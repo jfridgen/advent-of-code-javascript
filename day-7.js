@@ -12,7 +12,7 @@ function getChildComponents(childString) {
   const childObj = {};
   const regex = /^(?<qty>\d+)\s(?<color>.+)\sbag/;
   const matches = regex.exec(childString);
-  childObj.qty = matches.groups.qty;
+  childObj.qty = parseInt(matches.groups.qty);
   childObj.color = matches.groups.color;
 
   return childObj;
@@ -49,8 +49,20 @@ function matchingDescendent(rules, rule, search) {
   return false;
 }
 
+function countChildren(rule) {
+  let count = rule.children.reduce((acc, cur) => acc + cur.qty, 0);
+
+  let childRule;
+  for(let child of rule.children) {
+    childRule = rules.find(r => r.color == child.color);
+    count += (countChildren(childRule) * child.qty);
+  }
+
+  return count;
+}
+
 const inputLines = readInputLines("./day-7-input.txt");
 const rules = inputLines.map(getRule);
 const search = "shiny gold";
-const matchingRules = rules.filter(rule => matchingDescendent(rules, rule, search));
-console.log(matchingRules.length);
+const matchingRule = rules.find(r => r.color == search);
+console.log(countChildren(matchingRule));
