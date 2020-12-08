@@ -21,22 +21,59 @@ function parseOperation(opString) {
   return opObj;
 }
 
+function getAcc(ops) {
+  let i = 0;
+  let acc = 0;
+  while(i < ops.length && !ops[i].executed) {
+    ops[i].executed = true;
+
+    if(ops[i].op == 'nop') {
+      i += 1;
+    } else if(ops[i].op == 'acc') {
+      acc += ops[i].qty;
+      i += 1;
+    } else if(ops[i].op == 'jmp') {
+      i += ops[i].qty;
+    }
+  }
+
+  // Reset executed
+  for(innerOp of ops) {
+    innerOp.executed = false;
+  }
+
+  if (i == ops.length) {
+    return acc;
+  }
+
+  // Infinite loop
+  return 0;
+}
+
+function iterateOps(ops) {
+  let acc = 0;
+  for(op of ops) {
+    if(op.op == 'nop') {
+      op.op = 'jmp';
+      acc = getAcc(ops);
+      if (acc != 0) {
+        return acc;
+      }
+      op.op = 'nop';
+    } else if(op.op == 'jmp') {
+      op.op = 'nop';
+      acc = getAcc(ops);
+      if (acc != 0) {
+        return acc;
+      }
+      op.op = 'jmp';
+    }
+  }
+  return 0;
+}
+
 const inputLines = readInputLines("./day-8-input.txt");
 const ops = inputLines.map(line => parseOperation(line));
-
-let i = 0;
-let acc = 0;
-while(!ops[i].executed) {
-  ops[i].executed = true;
-
-  if(ops[i].op == 'nop') {
-    i += 1;
-  } else if(ops[i].op == 'acc') {
-    acc += ops[i].qty;
-    i += 1;
-  } else if(ops[i].op == 'jmp') {
-    i += ops[i].qty;
-  }
-}
+const acc = iterateOps(ops);
 
 console.log(acc);
