@@ -108,7 +108,7 @@ function createPassportObject(line) {
   let passport = {};
 
   let propValSplit;
-  for(propVal of allPropVals) {
+  for(let propVal of allPropVals) {
     propValSplit = propVal.split(":");
     passport[propValSplit[0]] = propValSplit[1];
   }

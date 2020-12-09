@@ -35,8 +35,8 @@ const seats = getArray(8);
 
 function getAllPossibleSeats() {
   let allPossibleSeats = [];
-  for (row of rows) {
-    for (seat of seats) {
+  for (let row of rows) {
+    for (let seat of seats) {
       allPossibleSeats.push((row * 8) + seat);
     }
   }

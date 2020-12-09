@@ -38,8 +38,8 @@ function getAcc(ops) {
   }
 
   // Reset executed
-  for(innerOp of ops) {
-    innerOp.executed = false;
+  for(let op of ops) {
+    op.executed = false;
   }
 
   if (i == ops.length) {
@@ -52,7 +52,7 @@ function getAcc(ops) {
 
 function iterateOps(ops) {
   let acc = 0;
-  for(op of ops) {
+  for(let op of ops) {
     if(op.op == 'nop') {
       op.op = 'jmp';
       acc = getAcc(ops);

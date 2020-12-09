@@ -11,9 +11,9 @@ function getUnanimousGroupYesResponses(responses) {
   const individualResponses = responses.split("\r\n");
   const unanimousResponses = [];
   let chars;
-  for(response of individualResponses) {
+  for(let response of individualResponses) {
     chars = response.split("");
-    for(char of chars) {
+    for(let char of chars) {
       if(individualResponses.every(r => r.includes(char))) {
         unanimousResponses.push(char);
       }
