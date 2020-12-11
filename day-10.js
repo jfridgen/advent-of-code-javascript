@@ -6,26 +6,44 @@ function readInputLines(filePath) {
   return textByLine;
 }
 
+function getCombinations(list, max, start, lookup) {
+  if(start != 0 && !list.includes(start)) {
+    return 0;
+  }
+
+  if(start == max) {
+    return 1;
+  }
+
+  let plus1Combos;
+  if(lookup.has(start+1)) {
+    plus1Combos = lookup.get(start+1);
+  } else{
+    plus1Combos = getCombinations(list, max, start+1, lookup);
+    lookup.set(start+1, plus1Combos);
+  }
+
+  let plus2Combos;
+  if(lookup.has(start+2)) {
+    plus2Combos = lookup.get(start+2);
+  } else{
+    plus2Combos = getCombinations(list, max, start+2, lookup);
+    lookup.set(start+2, plus2Combos);
+  }
+
+  let plus3Combos;
+  if(lookup.has(start+3)) {
+    plus3Combos = lookup.get(start+3);
+  } else{
+    plus3Combos = getCombinations(list, max, start+3, lookup);
+    lookup.set(start+3, plus3Combos);
+  }
+
+  return plus1Combos + plus2Combos + plus3Combos;
+}
+
 const allNums = readInputLines("./day-10-input.txt").map(line => parseInt(line));
 const max = Math.max(...allNums);
-let i = 0;
-let oneDiff = 0;
-let threeDiff = 0;
-while(i < max) {
-  if(allNums.includes(i+1)) {
-    i = i+1;
-    oneDiff += 1;
-  } else if(allNums.includes(i+3)) {
-    i = i+3;
-    threeDiff += 1;
-  } else {
-    throw new Error("No num found 1 or 3 greater");
-  }
-}
-// Increment once more for built-in adapter
-threeDiff += 1;
-const result = oneDiff * threeDiff;
-
-console.log(oneDiff);
-console.log(threeDiff);
-console.log(result);
+const lookup = new Map();
+const combos = getCombinations(allNums, max, 0, lookup);
+console.log(combos);
