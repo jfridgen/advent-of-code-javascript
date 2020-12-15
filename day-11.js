@@ -14,14 +14,14 @@ const EAST = "E";
 const WEST = "W";
 
 function getOccupiedVisibleSeatsForDirection(seatsByRow, currentRow, currentSeat, northSouth, eastWest) {
-  let row;
+  let row = currentRow;
   if(northSouth == NORTH) {
     row = currentRow - 1;
   } else if(northSouth == SOUTH) {
     row = currentRow + 1;
   }
 
-  let seat;
+  let seat = currentSeat;
   if(eastWest == WEST) {
     seat = currentSeat - 1;
   } else if(eastWest == EAST) {
@@ -40,9 +40,9 @@ function getOccupiedVisibleSeatsForDirection(seatsByRow, currentRow, currentSeat
     }
 
     if(northSouth == NORTH) {
-      ++row;
-    } else if(northSouth == SOUTH) {
       --row;
+    } else if(northSouth == SOUTH) {
+      ++row;
     }
 
     if(eastWest == WEST) {
@@ -96,9 +96,14 @@ function arrayEquals(a, b) {
   return true;
 }
 
+function printResult(result) {
+  result.forEach(row => console.log(row.join("")));
+  console.log("\n");
+}
+
 function applyRulesUntilNoChange(seatsByRow) {
   let result = applyRules(seatsByRow);
-  console.log(result);
+  //printResult(result);
 
   if(!arrayEquals(result, seatsByRow)) {
     return applyRulesUntilNoChange(result);
