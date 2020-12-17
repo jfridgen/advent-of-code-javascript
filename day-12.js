@@ -1,5 +1,3 @@
-const { dir } = require("console");
-
 function readInputLines(filePath) {
   const fs = require("fs"); // Built-in Node.js module
   const text = fs.readFileSync(filePath).toString("utf-8");
@@ -19,75 +17,65 @@ function parseInstruction(instructionString) {
   return instruction;
 }
 
-function clonePosition(currentPosition) {
-  return JSON.parse(JSON.stringify(currentPosition));
+function cloneShip(ship) {
+  return JSON.parse(JSON.stringify(ship));
 }
 
-function moveInDirection(direction, value, currentPosition) {
-  const newPosition = clonePosition(currentPosition);
+function moveShip(instruction, ship) {
+  const updatedShip = cloneShip(ship);
 
-  switch (direction) {
+  updatedShip.eWPos += ship.waypointEwPos * instruction.value;
+  updatedShip.nSPos += ship.waypointNsPos * instruction.value;
+
+  return updatedShip;
+}
+
+function moveWaypoint(instruction, ship) {
+  const updatedShip = cloneShip(ship);
+
+  switch (instruction.action) {
     case 'N':
-      newPosition.nSPos += value;
+      updatedShip.waypointNsPos += instruction.value;
       break;
     case 'S':
-      newPosition.nSPos -= value;
+      updatedShip.waypointNsPos -= instruction.value;
       break;
     case 'E':
-      newPosition.eWPos += value;
+      updatedShip.waypointEwPos += instruction.value;
       break;
     case 'W':
-      newPosition.eWPos -= value;
+      updatedShip.waypointEwPos -= instruction.value;
       break;
   }
 
-  return newPosition;
+  return updatedShip;
 }
 
-function translateDegreesToDirection(degrees) {
-  switch (degrees) {
-    case 0:
-      return 'W';
-    case 90:
-      return 'N';
-    case 180:
-      return 'E';
-    case 270:
-      return 'S';
+function rotateWaypoint(instruction, ship) {
+  const updatedShip = cloneShip(ship);
+
+  switch (instruction.action + instruction.value) {
+    case 'R90':
+    case 'L270':
+      updatedShip.waypointEwPos = ship.waypointNsPos;
+      updatedShip.waypointNsPos = -1 * ship.waypointEwPos;
+      break;
+    case 'R180':
+    case 'L180':
+      updatedShip.waypointEwPos = -1 * ship.waypointEwPos;
+      updatedShip.waypointNsPos = -1 * ship.waypointNsPos;
+      break;
+    case 'R270':
+    case 'L90':
+      updatedShip.waypointEwPos = -1 * ship.waypointNsPos;
+      updatedShip.waypointNsPos = ship.waypointEwPos;
+      break;
   }
+
+  return updatedShip;
 }
 
-function translateDirectionToDegress(direction) {
-  switch (direction) {
-    case 'W':
-      return 0;
-    case 'N':
-      return 90;
-    case 'E':
-      return 180;
-    case 'S':
-      return 270;
-  }
-}
-
-function turnRightOrLeft(rightLeft, value, currentPosition) {
-  const newPosition = clonePosition(currentPosition);
-  const degreesFacing = translateDirectionToDegress(currentPosition.directionFacing);
-  let newDegreesFacing;
-  if(rightLeft == 'R') {
-    newDegreesFacing = (degreesFacing + value) % 360;
-  } else if(rightLeft == 'L') {
-    newDegreesFacing = degreesFacing - value;
-    if(newDegreesFacing < 0) {
-      newDegreesFacing += 360;
-    }
-  }
-  newPosition.directionFacing = translateDegreesToDirection(newDegreesFacing);
-
-  return newPosition;
-}
-
-function applyInstruction(instruction, currentPosition) {
+function applyInstruction(instruction, ship) {
   let newPosition;
 
   switch (instruction.action) {
@@ -95,16 +83,14 @@ function applyInstruction(instruction, currentPosition) {
     case 'S':
     case 'E':
     case 'W':
-      newPosition = moveInDirection(instruction.action, instruction.value, currentPosition);
+      newPosition = moveWaypoint(instruction, ship);
       break;
     case 'L':
-      newPosition = turnRightOrLeft('L', instruction.value, currentPosition);
-      break;
     case 'R':
-      newPosition = turnRightOrLeft('R', instruction.value, currentPosition);
+      newPosition = rotateWaypoint(instruction, ship);
       break;
     case 'F':
-      newPosition = moveInDirection(currentPosition.directionFacing, instruction.value, currentPosition);
+      newPosition = moveShip(instruction, ship);
       break;
   }
 
@@ -114,13 +100,14 @@ function applyInstruction(instruction, currentPosition) {
 const instructionLines = readInputLines("./day-12-input.txt");
 const instructions = instructionLines.map(i => parseInstruction(i));
 
-let position = {};
-position.eWPos = 0;
-position.nSPos = 0;
-position.directionFacing = 'E';
+let ship = {};
+ship.eWPos = 0;
+ship.nSPos = 0;
+ship.waypointEwPos = 10;
+ship.waypointNsPos = 1;
 
 for(let instruction of instructions) {
-  position = applyInstruction(instruction, position);
+  ship = applyInstruction(instruction, ship);
 }
 
-console.log(Math.abs(position.eWPos) + Math.abs(position.nSPos));
+console.log(Math.abs(ship.eWPos) + Math.abs(ship.nSPos));
