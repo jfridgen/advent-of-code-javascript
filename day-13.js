@@ -6,32 +6,45 @@ function readInputLines(filePath) {
   return textByLine;
 }
 
-function convertBusToNum(bus) {
-  if(bus == "x") {
-    return -1;
+function convertToBus(busNumber, index) {
+  if(busNumber == "x") {
+    return null;
   }
-  return parseInt(bus);
+
+  const bus = {};
+  bus.number = parseInt(busNumber);
+  bus.offset = index;
+
+  return bus;
+}
+
+function getEarliestMatchingDepartureTime(buses, startingTime, multiplier) {
+  let time = startingTime;
+  let match = false;
+  let bus;
+  while(!match) {
+    match = true;
+    time = time + multiplier;
+    for(bus of buses) {
+      if((time + bus.offset) % bus.number != 0) {
+        match = false;
+        break;
+      }
+    }
+  }
+  return time;
 }
 
 const inputLines = readInputLines("./day-13-input.txt");
-const buses = inputLines[1].split(",").map(bus => convertBusToNum(bus));
-const maxBusNum = Math.max(...buses);
-const maxBusIndex = buses.indexOf(maxBusNum);
+const busNumbers = inputLines[1].split(",");
+const buses = busNumbers.map(busNumber =>
+  convertToBus(busNumber, busNumbers.indexOf(busNumber)))
+  .filter(bus => bus != null);
 
-let match = false;
-let timestamp = 0 - maxBusIndex;
-while(!match) {
-  match = true;
-  timestamp += maxBusNum;
-  for(let i = 0; i < buses.length; ++i) {
-    if(buses[i] == -1) {
-      continue;
-    }
-    if(!((timestamp + i) % buses[i] == 0)) {
-      match = false;
-      break;
-    }
-  }
+let time = 0;
+let multiplier = 0;
+for(let i = 1; i < buses.length; ++i) {
+  multiplier = buses.slice(0, i).reduce((acc, cur) => acc * cur.number, 1);
+  time = getEarliestMatchingDepartureTime(buses.slice(0, i + 1), time, multiplier);
 }
-
-console.log(timestamp);
+console.log(time);
