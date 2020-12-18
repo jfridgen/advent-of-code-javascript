@@ -14,15 +14,33 @@ function toBitString(num) {
   return bits;
 }
 
-function applyMask(mask, bits) {
+function applyMask(mask, bitString) {
   let maskChars = mask.split("");
-  let bitChars = bits.split("");
+  let bitChars = bitString.split("");
+
   for(let i = 0; i < maskChars.length; ++i) {
-    if(maskChars[i] != "X") {
+    if(maskChars[i] != "0") {
       bitChars[i] = maskChars[i];
     }
   }
-  return bitChars.join("");
+  return bitChars;
+}
+
+function applyFloatingBits(bitChars, index, impactedAddresses) {
+  if(index == bitChars.length) {
+    impactedAddresses.push(bitChars.join(""));
+    return;
+  }
+
+  if(bitChars[index] == "X") {
+    bitChars[index] = "1";
+    applyFloatingBits(bitChars, index + 1, impactedAddresses);
+    bitChars[index] = "0";
+    applyFloatingBits(bitChars, index + 1, impactedAddresses);
+    bitChars[index] = "X";
+  } else {
+    applyFloatingBits(bitChars, index + 1, impactedAddresses);
+  }
 }
 
 function extractMask(line) {
@@ -45,16 +63,23 @@ const inputLines = readInputLines("./day-14-input.txt");
 
 let mask;
 let memAddr;
+let maskedMemAddrChars = [];
 let number;
 let allMem = new Map();
+let impactedAddresses = [];
 
 for(let line of inputLines) {
   if(line.startsWith("mask")) {
     mask = extractMask(line);
   } else if(line.startsWith("mem")) {
+    impactedAddresses = [];
     memAddr = extractMemAddr(line);
     number = extractNumber(line);
-    allMem.set(memAddr, parseInt(applyMask(mask, toBitString(number)), 2));
+    maskedMemAddrChars = applyMask(mask, toBitString(memAddr));
+    applyFloatingBits(maskedMemAddrChars, 0, impactedAddresses);
+    for(let address of impactedAddresses) {
+      allMem.set(parseInt(address, 2), number);
+    }
   }
 }
 
