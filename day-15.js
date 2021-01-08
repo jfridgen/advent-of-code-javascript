@@ -4,13 +4,26 @@ function readInput(filePath) {
   return text.split(",").map(s => parseInt(s));
 }
 
-const numbers = readInput("./day-15-input.txt");
-numbers.push(0);
-for(let i = numbers.length; i <= 2019; ++i) {
-  if(!numbers.slice(0, i - 1).includes(numbers[i - 1])) {
-    numbers.push(0);
-  } else {
-    numbers.push((i - 1) - numbers.slice(0, i - 1).lastIndexOf(numbers[i - 1]));
-  }
+const startingNumbers = readInput("./day-15-input.txt");
+
+const map = new Map();
+for(let number of startingNumbers) {
+  map.set(number, startingNumbers.indexOf(number) + 1);
 }
-console.log(numbers.pop());
+
+function playTurn(currentTurn, lastNumberSpoken) {
+  if(map.has(lastNumberSpoken)) {
+    let lastTurnSpoken = currentTurn - map.get(lastNumberSpoken);
+    map.set(lastNumberSpoken, currentTurn);
+    return lastTurnSpoken;
+  }
+
+  map.set(lastNumberSpoken, currentTurn);
+  return 0;
+}
+
+let lastNumberSpoken = playTurn(startingNumbers.length + 1, 0);
+for(let i = startingNumbers.length + 2; i < 30000000; ++i) {
+  lastNumberSpoken = playTurn(i, lastNumberSpoken);
+}
+console.log(lastNumberSpoken);
